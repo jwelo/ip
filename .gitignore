@@ -3,6 +3,9 @@
 /out/
 /*.iml
 
+### Ignore Class files ###
+*.class
+
 # Gradle build files
 /.gradle/
 /build/
