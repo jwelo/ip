@@ -3,10 +3,11 @@ import java.util.Scanner;
 import java.util.ArrayList;
 
 public class Martin {
-    private static ArrayList<String> listOfActivities = new ArrayList<>();
-
+    private static ArrayList<String> listOfActivities = new ArrayList<String>();
+    private static ArrayList<Boolean> markedAsDone = new ArrayList<Boolean>();
     private static void storeActivity(String activity) {
         listOfActivities.add(activity);
+        markedAsDone.add(false);
     }
 
     private static void printHorizontalLine() {
@@ -30,10 +31,21 @@ public class Martin {
                 printHorizontalLine();
                 System.out.println("Martin's To-do List:");
                 for (int i = 0; i < listOfActivities.size(); i++) {
-                    System.out.printf("%d. %s\n", i+1, listOfActivities.get(i));
-
+                    String marked = " ";
+                    if (markedAsDone.get(i)) {
+                        marked = "X";
+                    }
+                    System.out.printf("%d. [%s] %s\n", i+1, marked, listOfActivities.get(i));
                 }
                 printHorizontalLine();
+            } else if (line.startsWith("mark")) {
+                String[] words = line.split(" ");
+                int markIndex = Integer.parseInt(words[1]) - 1;
+                    markedAsDone.set(markIndex, true);
+            } else if (line.startsWith("unmark")) {
+                String[] words = line.split(" ");
+                int markIndex = Integer.parseInt(words[1]) - 1;
+                markedAsDone.set(markIndex, false);
             }
             else {
                 // echo
