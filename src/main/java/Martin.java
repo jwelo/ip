@@ -21,13 +21,22 @@ public class Martin {
     public static void main(String[] args) {
         printer("Martin: \nHello sir my name is Martin.\nWhat can I do for you today?");
 
-        // Ask for next command
         Scanner in = new Scanner(System.in);
-        System.out.println("User Command: ");
-        String line = in.nextLine();
+        String line = "";
 
-        while (!line.equals("bye")) {
+        while (true) {
+            // Ask for next command
+            System.out.println("User Command: ");
+            line = in.nextLine();
+
+            // Check command
+            if (line.equals("bye")) {
+                // Bye
+                printer("Martin:\nBye Sir, see you tomorrow!");
+                break;
+            }
             if (line.equals("list")) {
+                // List Activities
                 printHorizontalLine();
                 System.out.println("Martin's To-do List:");
                 for (int i = 0; i < listOfActivities.size(); i++) {
@@ -39,26 +48,33 @@ public class Martin {
                 }
                 printHorizontalLine();
             } else if (line.startsWith("mark")) {
+                // Mark activity as done
                 String[] words = line.split(" ");
-                int markIndex = Integer.parseInt(words[1]) - 1;
-                    markedAsDone.set(markIndex, true);
+                int itemIndex = Integer.parseInt(words[1]);
+                if (itemIndex > listOfActivities.size()) {
+                    System.out.println("Sir, you have keyed in an invalid task index. Please try again");
+                    continue;
+                }
+                int markIndex = itemIndex - 1;
+                markedAsDone.set(markIndex, true);
+                System.out.printf("Good news Sir! I have marked %d. %s as done.\n", itemIndex, listOfActivities.get(markIndex));
             } else if (line.startsWith("unmark")) {
+                // Unmark activity as done
                 String[] words = line.split(" ");
-                int markIndex = Integer.parseInt(words[1]) - 1;
+                int itemIndex = Integer.parseInt(words[1]);
+                if (itemIndex > listOfActivities.size()) {
+                    System.out.println("Sir, you have keyed in an invalid task index. Please try again");
+                    continue;
+                }
+                int markIndex = itemIndex - 1;
                 markedAsDone.set(markIndex, false);
+                System.out.printf("Sorry Sir, I have to remark %d. %s as undone.\n", itemIndex, listOfActivities.get(markIndex));
             }
             else {
-                // echo
-                printer("Martin:\n" + "I will add this to my To-Do List: " + line);
-
                 // Add to listOfActivities
+                printer("Martin:\n" + "I will add this to my To-Do List: " + line);
                 storeActivity(line);
             }
-            // Prompt for next command
-            System.out.println("User Command: ");
-            line = in.nextLine();
         }
-        // Bye
-        printer("Martin:\nBye Sir, see you tomorrow!");
     }
 }
