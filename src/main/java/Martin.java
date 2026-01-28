@@ -12,28 +12,41 @@ public class Martin {
     private static void printHorizontalLine() {
         System.out.println("_".repeat(40));
     }
-
+    private static void printer(String line) {
+        printHorizontalLine();
+        System.out.println(line);
+        printHorizontalLine();
+    }
     public static void main(String[] args) {
-        printHorizontalLine();
-        System.out.println("Martin: \nHello sir my name is Martin.\nWhat can I do for you today?");
-        printHorizontalLine();
-        //System.out.println("Martin: Sorry Sir, Today is my off day. See you tomorrow!");
+        printer("Martin: \nHello sir my name is Martin.\nWhat can I do for you today?");
 
+        // Ask for next command
         Scanner in = new Scanner(System.in);
         System.out.println("User Command: ");
         String line = in.nextLine();
 
         while (!line.equals("bye")) {
-            // echo
-            printHorizontalLine();
-            System.out.println("Martin:\n" + line);
-            printHorizontalLine();
+            if (line.equals("list")) {
+                printHorizontalLine();
+                System.out.println("Martin's To-do List:");
+                for (int i = 0; i < listOfActivities.size(); i++) {
+                    System.out.printf("%d. %s\n", i+1, listOfActivities.get(i));
 
+                }
+                printHorizontalLine();
+            }
+            else {
+                // echo
+                printer("Martin:\n" + "I will add this to my To-Do List: " + line);
+
+                // Add to listOfActivities
+                storeActivity(line);
+            }
+            // Prompt for next command
             System.out.println("User Command: ");
             line = in.nextLine();
         }
-        printHorizontalLine();
-        System.out.println("Martin:\nBye Sir, see you tomorrow!");
-        printHorizontalLine();
+        // Bye
+        printer("Martin:\nBye Sir, see you tomorrow!");
     }
 }
