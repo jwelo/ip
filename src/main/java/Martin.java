@@ -25,14 +25,14 @@ public class Martin {
     }
 
     public static void main(String[] args) {
-        printer("Martin: \nHello sir my name is Martin.\nWhat can I do for you today?");
+        printer("Martin:\nHello sir my name is Martin.\nWhat can I do for you today?");
 
         Scanner in = new Scanner(System.in);
         String line = "";
 
         while (true) {
             // Ask for next command
-            System.out.println("User Command: ");
+            System.out.println("User Command:");
             line = in.nextLine();
             String stringAfterCommand = line.substring(line.indexOf(' ') + 1);
             String[] userCommandArray = line.split(" ");
