@@ -6,41 +6,48 @@ public class Martin {
     public static final int HORIZONTAL_LINE = 40;
     private static Task[] tasks = new Task[100];
     private static int taskCounter = 0;
+    private static boolean isBye = false;
 
     public static void main(String[] args) {
         Scanner in = getFirstScanner();
 
-        label:
-        while (true) {
+        while (!isBye) {
             // Ask for next command
             System.out.println("User Command:");
             String line = in.nextLine();
-            String stringAfterCommand = line.substring(line.indexOf(' ') + 1);
-            String[] userCommandArray = line.split(" ");
+            String[] userCommandArray = line.split(" ", 2);
+            String stringAfterCommand = userCommandArray.length > 1 ? userCommandArray[1] : "";
 
             // Check command
-            switch (userCommandArray[0]) {
-            case "bye":
-                exitMartin();
-                break label;
-            case "list":
-                displayListOfTasks();
-                break;
-            case "mark":
-                markTask(userCommandArray);
-                break;
-            case "unmark":
-                unmarkTask(userCommandArray);
-                break;
-            case "todo":
-                addTodoTask(stringAfterCommand);
-                break;
-            case "deadline":
-                addDeadlineTask(stringAfterCommand);
-                break;
-            case "event":
-                addEventTask(stringAfterCommand);
-                break;
+            try {
+                switch (userCommandArray[0]) {
+                case "bye":
+                    exitMartin();
+                    break;
+                case "list":
+                    displayListOfTasks();
+                    break;
+                case "mark":
+                    markTask(userCommandArray);
+                    break;
+                case "unmark":
+                    unmarkTask(userCommandArray);
+                    break;
+                case "todo":
+                    addTodoTask(stringAfterCommand);
+                    break;
+                case "deadline":
+                    addDeadlineTask(stringAfterCommand);
+                    break;
+                case "event":
+                    addEventTask(stringAfterCommand);
+                    break;
+                default:
+                    throw new IllegalArgumentException("you have keyed in an unrecognised command.");
+                }
+            } catch (IllegalArgumentException e) {
+                printer("Martin:\nSir, " + e.getMessage() + " Please try again.");
+                continue;
             }
         }
     }
@@ -74,6 +81,7 @@ public class Martin {
      */
     private static void exitMartin() {
         printer("Martin:\nBye Sir, see you tomorrow!");
+        isBye = true;
         return;
     }
 
@@ -94,39 +102,40 @@ public class Martin {
      * Mark task as done. Task index is second argument in user input
      */
     private static void markTask(String[] userCommandArray) {
-        int itemIndex = Integer.parseInt(userCommandArray[1]);
-        if (isInvalidIndex(itemIndex)) return;
-        int markIndex = itemIndex - 1;
-        tasks[markIndex].markAsDone();
-        printer(String.format("Martin:\nGood news Sir! I have marked %d. %s as done.", itemIndex, tasks[markIndex].getTask()));
+        int itemIndex = getItemIndex(userCommandArray);
+        tasks[itemIndex - 1].markAsDone();
+        printer(String.format("Martin:\nGood news Sir! I have marked %d. %s as done.", itemIndex, tasks[itemIndex - 1].getTask()));
     }
+
     /**
      * Unmark task as done. Task index is second argument in user input
      */
     private static void unmarkTask(String[] userCommandArray) {
-        int itemIndex = Integer.parseInt(userCommandArray[1]);
-        if (isInvalidIndex(itemIndex)) return;
-        int markIndex = itemIndex - 1;
-        tasks[markIndex].unmarkAsDone();
-        printer(String.format("Martin:\nSorry Sir, I have to remark %d. %s as undone.", itemIndex, tasks[markIndex].getTask()));
+        int itemIndex = getItemIndex(userCommandArray);
+        tasks[itemIndex - 1].unmarkAsDone();
+        printer(String.format("Martin:\nSorry Sir, I have to remark %d. %s as undone.", itemIndex, tasks[itemIndex - 1].getTask()));
     }
 
-    /**
-     * Check if user input argument is a valid task index
-     * @return true if invalid, false if valid
-     */
-    private static boolean isInvalidIndex(int itemIndex) {
-        if (itemIndex > tasks.length) {
-            System.out.println("Martin:\nSir, you have keyed in an invalid task index. Please try again");
-            return true;
+    private static int getItemIndex(String[] userCommandArray) {
+        int itemIndex = 0;
+        try {
+            itemIndex = Integer.parseInt(userCommandArray[1]);
+        } catch (NumberFormatException e) {
+            throwError("please key in an integer for the task index!");
         }
-        return false;
+        if (itemIndex > taskCounter) {
+            throwError("you have keyed in an index that does not exist.");
+        }
+        return itemIndex;
     }
 
     /**
      * Add a Todo task to tasks[]
      */
     private static void addTodoTask(String stringAfterCommand) {
+        if (stringAfterCommand.isBlank()) {
+            throwError("please follow the Todo task format: todo <description>.");
+        }
         Todo task = new Todo(stringAfterCommand);
         storeActivity(task);
         printer("Martin:\nYes Sir, I have added this task to my list:\n" + "    [" + task.getTypeOfTask() + "]" + "[ ] " + task.getTask() + "\nI currently have " + taskCounter + " tasks in the list.");
@@ -136,10 +145,20 @@ public class Martin {
      * Add a Event task to tasks[]
      */
     private static void addEventTask(String stringAfterCommand) {
-        String description = stringAfterCommand.substring(0, stringAfterCommand.indexOf("/from") - 1);
-        String startDate = stringAfterCommand.substring(stringAfterCommand.indexOf("/from") + 6, stringAfterCommand.indexOf("/to") - 1);
-        String endDate = stringAfterCommand.substring(stringAfterCommand.indexOf("/to") + 4);
-        Event task = new Event(description,startDate,endDate);
+        if (!(stringAfterCommand.contains("/from") && (stringAfterCommand.contains("/to")))) {
+            throwError("please follow the Event task format: event <description> /from <startDate> /to <endDate>.");
+        }
+        String description = null;
+        String startDate = null;
+        String endDate = null;
+        try {
+            description = stringAfterCommand.substring(0, stringAfterCommand.indexOf("/from") - 1);
+            startDate = stringAfterCommand.substring(stringAfterCommand.indexOf("/from") + 6, stringAfterCommand.indexOf("/to") - 1);
+            endDate = stringAfterCommand.substring(stringAfterCommand.indexOf("/to") + 4);
+        } catch (IndexOutOfBoundsException e) {
+            throwError("please follow the Event task format: event <description> /from <startDate> /to <endDate>.");
+        }
+        Event task = new Event(description, startDate, endDate);
         storeActivity(task);
         printer("Martin:\nYes Sir, I have added this task to my list:\n" + "    [" + task.getTypeOfTask() + "]" + "[ ] " + task.getTask() + "\nI currently have " + taskCounter + " tasks in the list.");
     }
@@ -148,10 +167,23 @@ public class Martin {
      * Add a Deadline task to tasks[]
      */
     private static void addDeadlineTask(String stringAfterCommand) {
-        String description = stringAfterCommand.substring(0, stringAfterCommand.indexOf("/by") - 1);
-        String deadline = stringAfterCommand.substring(stringAfterCommand.indexOf("/by") + 4);
-        Deadline task = new Deadline(description,deadline);
+        if (!stringAfterCommand.contains("/by")) {
+            throwError("please follow the Deadline task format: deadline <description> /by <deadline>.");
+        }
+        String description = null;
+        String deadline = null;
+        try {
+            description = stringAfterCommand.substring(0, stringAfterCommand.indexOf("/by") - 1);
+            deadline = stringAfterCommand.substring(stringAfterCommand.indexOf("/by") + 4);
+        } catch (IndexOutOfBoundsException e) {
+            throwError("please follow the Deadline task format: deadline <description> /by <deadline>.");
+        }
+        Deadline task = new Deadline(description, deadline);
         storeActivity(task);
         printer("Martin:\nYes Sir, I have added this task to my list:\n" + "    [" + task.getTypeOfTask() + "]" + "[ ] " + task.getTask() + "\nI currently have " + taskCounter + " tasks in the list.");
+    }
+
+    private static void throwError(String message) {
+        throw new IllegalArgumentException(message);
     }
 }
