@@ -1,4 +1,4 @@
-package src.main.java;
+package martin.task;
 
 public class Todo extends Task {
 

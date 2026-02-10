@@ -1,6 +1,11 @@
-package src.main.java;
+package martin;
 
 import java.util.Scanner;
+
+import martin.task.Deadline;
+import martin.task.Event;
+import martin.task.Task;
+import martin.task.Todo;
 
 public class Martin {
     public static final int HORIZONTAL_LINE = 40;

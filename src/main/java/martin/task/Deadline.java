@@ -1,4 +1,4 @@
-package src.main.java;
+package martin.task;
 
 public class Deadline extends Task {
     private String deadline;
