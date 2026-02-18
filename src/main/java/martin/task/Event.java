@@ -13,6 +13,14 @@ public class Event extends Task {
         this.endDate = endDate;
     }
 
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public String getEndDate() {
+        return endDate;
+    }
+
     public Event(String description, String startDate, String endDate) {
         super(description);
         changeTypeOfTask("E");

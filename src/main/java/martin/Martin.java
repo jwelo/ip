@@ -1,7 +1,12 @@
 package martin;
 
-import java.util.Scanner;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
 import martin.task.Deadline;
 import martin.task.Event;
@@ -10,12 +15,16 @@ import martin.task.Todo;
 
 public class Martin {
     public static final int HORIZONTAL_LINE = 40;
-    private static ArrayList<Task> tasks = new ArrayList<>();
-    private static int taskCounter = 0;
+    private static List<Task> tasks = new ArrayList<>();
     private static boolean isBye = false;
 
     public static void main(String[] args) {
         Scanner in = getFirstScanner();
+        try {
+            getSavedTasks();
+        } catch (IOException e) {
+            System.err.println("Could not load saved tasks. Reason: " + e.getMessage());
+        }
 
         while (!isBye) {
             // Ask for next command
@@ -41,9 +50,8 @@ public class Martin {
                     break;
                 case "delete":
                     int itemIndex = getItemIndex(userCommandArray);
-                    printer(String.format("Martin:\nUnderstood Sir, I have deleted this task - %d. %s.", itemIndex, tasks.get(itemIndex - 1).getTask()));
-                    tasks.remove(itemIndex - 1);
-                    taskCounter--;
+                    printer(String.format("Martin:\nUnderstood Sir, I have deleted this task - %d. %s.", itemIndex, tasks.get(itemIndex - 1).getTaskDescription()));
+                    tasks.remove(itemIndex - 1);;
                     break;
                 case "todo":
                     addTodoTask(stringAfterCommand);
@@ -64,10 +72,41 @@ public class Martin {
         }
     }
 
+    private static void getSavedTasks() throws IOException {
+        Path savedList = Path.of("savedList.txt");
+        if (Files.notExists(savedList)) {
+            System.out.println("No save file found. Creating 'savedList.txt'...");
+            Files.createFile(savedList);
+            System.out.println("File created successfully!");
+        } else {
+            System.out.println("Save file detected. Loading data...");
+        }
+        List<String> savedTasks = Files.readAllLines(savedList);
+        for (String line : savedTasks) {
+            String[] parts = line.split(";");
+            //String typeOfTask = parts[0]; // currently not needed as list does not include type of task
+            String done = parts[1];
+            String description = parts[2];
+            Task task = new Task(description);
+            if (done.equals("1")) {
+                task.markAsDone();
+            }
+            tasks.add(task);
+        }
+    }
+
     private static void storeActivity(Task activity) {
-        tasks.add(taskCounter,activity);
-        taskCounter++;
-        //markedAsDone.add(false);
+        Path path = Path.of("savedList.txt");
+        String formattedTaskAsString = activity.getTypeOfTask() + ";" + activity.getTaskDone() + ";" + activity.getTaskDescription();
+        formattedTaskAsString += "\n";
+        try {
+            Files.writeString(path, formattedTaskAsString,
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            System.err.println("Could not save to file: " + e.getMessage());
+        }
+        tasks.add(activity);
     }
 
     private static void printHorizontalLine() {
@@ -98,14 +137,14 @@ public class Martin {
     }
 
     /**
-     * Displays list of tasks from tasks[]
+     * Displays list of tasks from savedList.txt
      */
     private static void displayListOfTasks() {
         printHorizontalLine();
         System.out.println("Martin's To-do List:");
-        for (int i = 0; i < taskCounter; i++) {
+        for (int i = 0; i < tasks.size(); i++) {
             String marked = tasks.get(i).getTaskDone() ? "X" : " ";
-            System.out.printf("%d. [%s] %s\n", i + 1, marked, tasks.get(i).getTask());
+            System.out.printf("%d. [%s] %s\n", i + 1, marked, tasks.get(i).getTaskDescription());
         }
         printHorizontalLine();
     }
@@ -116,7 +155,7 @@ public class Martin {
     private static void markTask(String[] userCommandArray) {
         int itemIndex = getItemIndex(userCommandArray);
         tasks.get(itemIndex - 1).markAsDone();
-        printer(String.format("Martin:\nGood news Sir! I have marked %d. %s as done.", itemIndex, tasks.get(itemIndex - 1).getTask()));
+        printer(String.format("Martin:\nGood news Sir! I have marked %d. %s as done.", itemIndex, tasks.get(itemIndex - 1).getTaskDescription()));
     }
 
     /**
@@ -125,7 +164,7 @@ public class Martin {
     private static void unmarkTask(String[] userCommandArray) {
         int itemIndex = getItemIndex(userCommandArray);
         tasks.get(itemIndex - 1).unmarkAsDone();
-        printer(String.format("Martin:\nSorry Sir, I have to remark %d. %s as undone.", itemIndex, tasks.get(itemIndex - 1).getTask()));
+        printer(String.format("Martin:\nSorry Sir, I have to remark %d. %s as undone.", itemIndex, tasks.get(itemIndex - 1).getTaskDescription()));
     }
 
     private static int getItemIndex(String[] userCommandArray) {
@@ -135,7 +174,7 @@ public class Martin {
         } catch (NumberFormatException e) {
             throwError("please key in an integer for the task index!");
         }
-        if (itemIndex > taskCounter) {
+        if (itemIndex > tasks.size()) {
             throwError("you have keyed in an index that does not exist.");
         }
         return itemIndex;
@@ -150,7 +189,7 @@ public class Martin {
         }
         Todo task = new Todo(stringAfterCommand);
         storeActivity(task);
-        printer("Martin:\nYes Sir, I have added this task to my list:\n" + "    [" + task.getTypeOfTask() + "]" + "[ ] " + task.getTask() + "\nI currently have " + taskCounter + " tasks in the list.");
+        printer("Martin:\nYes Sir, I have added this task to my list:\n" + "    [" + task.getTypeOfTask() + "]" + "[ ] " + task.getTaskDescription() + "\nI currently have " + tasks.size() + " tasks in the list.");
     }
 
     /**
@@ -172,7 +211,7 @@ public class Martin {
         }
         Event task = new Event(description, startDate, endDate);
         storeActivity(task);
-        printer("Martin:\nYes Sir, I have added this task to my list:\n" + "    [" + task.getTypeOfTask() + "]" + "[ ] " + task.getTask() + "\nI currently have " + taskCounter + " tasks in the list.");
+        printer("Martin:\nYes Sir, I have added this task to my list:\n" + "    [" + task.getTypeOfTask() + "]" + "[ ] " + task.getTaskDescription() + "\nI currently have " + tasks.size() + " tasks in the list.");
     }
 
     /**
@@ -192,7 +231,7 @@ public class Martin {
         }
         Deadline task = new Deadline(description, deadline);
         storeActivity(task);
-        printer("Martin:\nYes Sir, I have added this task to my list:\n" + "    [" + task.getTypeOfTask() + "]" + "[ ] " + task.getTask() + "\nI currently have " + taskCounter + " tasks in the list.");
+        printer("Martin:\nYes Sir, I have added this task to my list:\n" + "    [" + task.getTypeOfTask() + "]" + "[ ] " + task.getTaskDescription() + "\nI currently have " + tasks.size() + " tasks in the list.");
     }
 
     private static void throwError(String message) {
