@@ -6,6 +6,8 @@
 ### Ignore Class files ###
 *.class
 
+src/main/java/META-INF/
+
 # Gradle build files
 /.gradle/
 /build/
