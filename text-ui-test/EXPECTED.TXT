@@ -39,5 +39,16 @@ ________________________________________
 User Command:
 ________________________________________
 Martin:
+Understood Sir, I have deleted this task - 3. project meeting (from: Mon 2pm to: 4pm).
+________________________________________
+User Command:
+________________________________________
+Martin's To-do List:
+1. [X] clean the dishes
+2. [ ] return book (by: Sunday)
+________________________________________
+User Command:
+________________________________________
+Martin:
 Bye Sir, see you tomorrow!
 ________________________________________

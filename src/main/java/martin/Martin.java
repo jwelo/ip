@@ -39,6 +39,12 @@ public class Martin {
                 case "unmark":
                     unmarkTask(userCommandArray);
                     break;
+                case "delete":
+                    int itemIndex = getItemIndex(userCommandArray);
+                    printer(String.format("Martin:\nUnderstood Sir, I have deleted this task - %d. %s.", itemIndex, tasks.get(itemIndex - 1).getTask()));
+                    tasks.remove(itemIndex - 1);
+                    taskCounter--;
+                    break;
                 case "todo":
                     addTodoTask(stringAfterCommand);
                     break;
