@@ -49,9 +49,7 @@ public class Martin {
                     unmarkTask(userCommandArray);
                     break;
                 case "delete":
-                    int itemIndex = getItemIndex(userCommandArray);
-                    printer(String.format("Martin:\nUnderstood Sir, I have deleted this task - %d. %s.", itemIndex, tasks.get(itemIndex - 1).getTaskDescription()));
-                    tasks.remove(itemIndex - 1);;
+                    deleteTask(userCommandArray);
                     break;
                 case "todo":
                     addTodoTask(stringAfterCommand);
@@ -70,6 +68,31 @@ public class Martin {
                 continue;
             }
         }
+    }
+    
+    private static void deleteTask(String[] userCommandArray) {
+        int itemIndex = getItemIndex(userCommandArray);
+        printer(String.format("Martin:\nUnderstood Sir, I have deleted this task - %d. %s.", itemIndex, tasks.get(itemIndex - 1).getTaskDescription()));
+        tasks.remove(itemIndex - 1);
+
+        Path path = Path.of("savedList.txt");
+        try {
+            saveAllTasks(path);
+        } catch (IOException e) {
+            System.err.println("Error updating save file: " + e.getMessage());
+        }
+    }
+
+    private static void saveAllTasks(Path path) throws IOException {
+        List<String> lines = new ArrayList<>();
+        for (Task t : tasks) {
+            String line = t.getTypeOfTask() + ";" + t.getTaskDone() + ";" + t.getTaskDescription();
+            lines.add(line);
+        }
+        Files.write(path, lines,
+                StandardOpenOption.CREATE,
+                StandardOpenOption.WRITE,
+                StandardOpenOption.TRUNCATE_EXISTING);
     }
 
     private static void getSavedTasks() throws IOException {
