@@ -1,6 +1,7 @@
 package martin;
 
 import java.util.Scanner;
+import java.util.ArrayList;
 
 import martin.task.Deadline;
 import martin.task.Event;
@@ -9,7 +10,7 @@ import martin.task.Todo;
 
 public class Martin {
     public static final int HORIZONTAL_LINE = 40;
-    private static Task[] tasks = new Task[100];
+    private static ArrayList<Task> tasks = new ArrayList<>();
     private static int taskCounter = 0;
     private static boolean isBye = false;
 
@@ -58,7 +59,7 @@ public class Martin {
     }
 
     private static void storeActivity(Task activity) {
-        tasks[taskCounter] = activity;
+        tasks.add(taskCounter,activity);
         taskCounter++;
         //markedAsDone.add(false);
     }
@@ -97,8 +98,8 @@ public class Martin {
         printHorizontalLine();
         System.out.println("Martin's To-do List:");
         for (int i = 0; i < taskCounter; i++) {
-            String marked = tasks[i].getTaskDone() ? "X" : " ";
-            System.out.printf("%d. [%s] %s\n", i + 1, marked, tasks[i].getTask());
+            String marked = tasks.get(i).getTaskDone() ? "X" : " ";
+            System.out.printf("%d. [%s] %s\n", i + 1, marked, tasks.get(i).getTask());
         }
         printHorizontalLine();
     }
@@ -108,8 +109,8 @@ public class Martin {
      */
     private static void markTask(String[] userCommandArray) {
         int itemIndex = getItemIndex(userCommandArray);
-        tasks[itemIndex - 1].markAsDone();
-        printer(String.format("Martin:\nGood news Sir! I have marked %d. %s as done.", itemIndex, tasks[itemIndex - 1].getTask()));
+        tasks.get(itemIndex - 1).markAsDone();
+        printer(String.format("Martin:\nGood news Sir! I have marked %d. %s as done.", itemIndex, tasks.get(itemIndex - 1).getTask()));
     }
 
     /**
@@ -117,8 +118,8 @@ public class Martin {
      */
     private static void unmarkTask(String[] userCommandArray) {
         int itemIndex = getItemIndex(userCommandArray);
-        tasks[itemIndex - 1].unmarkAsDone();
-        printer(String.format("Martin:\nSorry Sir, I have to remark %d. %s as undone.", itemIndex, tasks[itemIndex - 1].getTask()));
+        tasks.get(itemIndex - 1).unmarkAsDone();
+        printer(String.format("Martin:\nSorry Sir, I have to remark %d. %s as undone.", itemIndex, tasks.get(itemIndex - 1).getTask()));
     }
 
     private static int getItemIndex(String[] userCommandArray) {
