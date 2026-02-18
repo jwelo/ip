@@ -15,7 +15,7 @@ public class Task {
         return isDone;
     }
 
-    public String getTask() {
+    public String getTaskDescription() {
         return description;
     }
 

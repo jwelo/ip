@@ -7,6 +7,10 @@ public class Deadline extends Task {
         this.deadline = deadline;
     }
 
+    public String getDeadline() {
+        return deadline;
+    }
+
     public Deadline(String description, String deadline) {
         super(description);
         changeTypeOfTask("D");
