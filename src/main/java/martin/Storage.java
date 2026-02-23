@@ -29,9 +29,10 @@ public class Storage {
         List<Task> loadedTasks = new ArrayList<>();
         for (String line : lines) {
             String[] parts = line.split(";");
+            String taskType = parts[0];
             String done = parts[1];
             String description = parts[2];
-            Task task = new Task(description);
+            Task task = new Task(taskType,done,description);
             if (done.equals("1")) {
                 task.markAsDone();
             }
