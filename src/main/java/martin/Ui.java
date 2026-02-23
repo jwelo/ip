@@ -21,6 +21,7 @@ public class Ui {
     }
 
     public String getNextLine() {
+        System.out.println("User Command:");
         return in.nextLine();
     }
 
@@ -84,8 +85,8 @@ public class Ui {
         printer("Martin:\nYes Sir, I have added this task to my list:\n" + "    [" + task.getTypeOfTask() + "]" + "[ ] " + task.getTaskDescription() + "\nI currently have " + taskListSize + " tasks in the list.");
     }
 
-    public void showTaskDeleteSuccess(List<Task> tasks, int itemIndex) {
-        printer(String.format("Martin:\nUnderstood Sir, I have deleted this task - %d. %s.", itemIndex, tasks.get(itemIndex - 1).getTaskDescription()));
+    public void showTaskDeleteSuccess(Task task, int itemIndex) {
+        printer(String.format("Martin:\nUnderstood Sir, I have deleted this task - %d. %s.", itemIndex, task.getTaskDescription()));
     }
 
 //    public void showInvalidTodoError() {
