@@ -14,6 +14,10 @@ public class Martin {
     private static TaskList tasks;
     private static boolean isBye = false;
 
+    /**
+     * The main class for the Martin task management application.
+     * It serves as the main coordinator between the UI, Storage, TaskList, and Parser.
+     */
     public static void main(String[] args) {
         try {
             tasks = new TaskList(storage.loadSavedTasks());
