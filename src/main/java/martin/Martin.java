@@ -82,7 +82,7 @@ public class Martin {
 
     private static void deleteTask(String userArgument) throws IOException {
         int itemIndex = Parser.parseIndex(userArgument);
-        Task deletedTask = tasks.deleteTask(itemIndex - 1);
+        Task deletedTask = tasks.deleteTask(itemIndex);
         ui.showTaskDeleteSuccess(deletedTask, itemIndex);
         storage.saveAllTasks(tasks.getAllTasks());
     }
