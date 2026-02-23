@@ -12,7 +12,7 @@ public class Parser {
     /**
      * Extracts the arguments (everything after the command word).
      */
-    public static String getInputArguments(String fullCommand) {
+    public static String getArgumentsAfterCommand(String fullCommand) {
         String[] parts = fullCommand.split(" ", 2);
         return parts.length > 1 ? parts[1].trim() : "";
     }

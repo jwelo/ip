@@ -27,7 +27,7 @@ public class Martin {
             // Ask for next command
             String line = ui.getNextLine();
             String commandWord = Parser.getCommandWord(line);
-            String stringAfterCommand = Parser.getInputArguments(line);
+            String stringAfterCommand = Parser.getArgumentsAfterCommand(line);
 
             // Check command
             try {
