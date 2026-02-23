@@ -85,7 +85,18 @@ public class Ui {
         printer(String.format("Martin:\nUnderstood Sir, I have deleted this task - %d. %s.", itemIndex, task.getTaskDescription()));
     }
 
-//    public void showInvalidTodoError() {
-//        throwError("please follow the Todo task format: todo <description>.");
-//    }
+    public void showTasksContainingKeyword(List<String> tasksContainingKeyword) {
+        if (tasksContainingKeyword.isEmpty()) {
+            printer("Martin:\nThere are no tasks in the list containing this keyword.");
+        } else {
+            printHorizontalLine();
+            System.out.println("Martin:\nHere are a list of tasks containing this keyword:");
+            int taskIndex = 0;
+            for (String tasks : tasksContainingKeyword) {
+                System.out.println((taskIndex + 1) + ". " + tasksContainingKeyword.get(taskIndex));
+                taskIndex++;
+            }
+            printHorizontalLine();
+        }
+    }
 }
