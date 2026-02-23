@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
+//import java.util.Scanner;
 
 import martin.task.Deadline;
 import martin.task.Event;
@@ -14,22 +14,25 @@ import martin.task.Task;
 import martin.task.Todo;
 
 public class Martin {
-    public static final int HORIZONTAL_LINE = 40;
+//    public static final int HORIZONTAL_LINE = 40;
+    private static Ui ui = new Ui();
     private static List<Task> tasks = new ArrayList<>();
     private static boolean isBye = false;
 
     public static void main(String[] args) {
-        Scanner in = getFirstScanner();
+//        Scanner in = getFirstScanner();
         try {
             getSavedTasks();
         } catch (IOException e) {
-            System.err.println("Could not load saved tasks. Reason: " + e.getMessage());
+//            System.err.println("Could not load saved tasks. Reason: " + e.getMessage());
+            ui.showFileLoadingError();
         }
+
 
         while (!isBye) {
             // Ask for next command
             System.out.println("User Command:");
-            String line = in.nextLine();
+            String line = ui.getNextLine();
             String[] userCommandArray = line.split(" ", 2);
             String stringAfterCommand = userCommandArray.length > 1 ? userCommandArray[1] : "";
 
@@ -37,10 +40,11 @@ public class Martin {
             try {
                 switch (userCommandArray[0]) {
                 case "bye":
-                    exitMartin();
+                    ui.exitMartin();
+                    isBye = true;
                     break;
                 case "list":
-                    displayListOfTasks();
+                    ui.displayListOfTasks(tasks);
                     break;
                 case "mark":
                     markTask(userCommandArray);
@@ -64,22 +68,23 @@ public class Martin {
                     throw new IllegalArgumentException("you have keyed in an unrecognised command.");
                 }
             } catch (IllegalArgumentException e) {
-                printer("Martin:\nSir, " + e.getMessage() + " Please try again.");
-                continue;
+//                ui.printer("Martin:\nSir, " + e.getMessage() + " Please try again.");
+                ui.showError(e.getMessage());
             }
         }
     }
-    
+
     private static void deleteTask(String[] userCommandArray) {
         int itemIndex = getItemIndex(userCommandArray);
-        printer(String.format("Martin:\nUnderstood Sir, I have deleted this task - %d. %s.", itemIndex, tasks.get(itemIndex - 1).getTaskDescription()));
+//        ui.printer(String.format("Martin:\nUnderstood Sir, I have deleted this task - %d. %s.", itemIndex, tasks.get(itemIndex - 1).getTaskDescription()));
+        ui.showTaskDeleteSuccess(tasks, itemIndex);
         tasks.remove(itemIndex - 1);
 
         Path path = Path.of("savedList.txt");
         try {
             saveAllTasks(path);
         } catch (IOException e) {
-            System.err.println("Error updating save file: " + e.getMessage());
+            ui.showFileSaveError(e);
         }
     }
 
@@ -98,11 +103,14 @@ public class Martin {
     private static void getSavedTasks() throws IOException {
         Path savedList = Path.of("savedList.txt");
         if (Files.notExists(savedList)) {
-            System.out.println("No save file found. Creating 'savedList.txt'...");
+//            System.out.println("No save file found.");
+            ui.showFileLoadingError();
             Files.createFile(savedList);
-            System.out.println("File created successfully!");
+//            System.out.println("File created successfully!");
+            ui.showFileCreateSuccess();
         } else {
-            System.out.println("Save file detected. Loading data...");
+//            System.out.println("Save file detected. Loading data...");
+            ui.showFileSaveFound();
         }
         List<String> savedTasks = Files.readAllLines(savedList);
         for (String line : savedTasks) {
@@ -127,58 +135,61 @@ public class Martin {
                     StandardOpenOption.CREATE,
                     StandardOpenOption.APPEND);
         } catch (IOException e) {
-            System.err.println("Could not save to file: " + e.getMessage());
+//            System.err.println("Could not save to file: " + e.getMessage());
+            ui.showFileSaveError(e);
         }
         tasks.add(activity);
     }
 
-    private static void printHorizontalLine() {
-        System.out.println("_".repeat(HORIZONTAL_LINE));
-    }
+//    private static void printHorizontalLine() {
+//        System.out.println("_".repeat(HORIZONTAL_LINE));
+//    }
 
-    private static void printer(String line) {
-        printHorizontalLine();
-        System.out.println(line);
-        printHorizontalLine();
-    }
+//    private static void printer(String line) {
+//        printHorizontalLine();
+//        System.out.println(line);
+//        printHorizontalLine();
+//    }
 
-    private static Scanner getFirstScanner() {
-        printer("Martin:\nHello sir my name is Martin.\nWhat can I do for you today?");
+//    private static Scanner getFirstScanner() {
+//        printer("Martin:\nHello sir my name is Martin.\nWhat can I do for you today?");
+//
+//        Scanner in = new Scanner(System.in);
+//        String line = "";
+//        return in;
+//    }
 
-        Scanner in = new Scanner(System.in);
-        String line = "";
-        return in;
-    }
+//    /**
+//     * Display end message and quits
+//     */
+//    private static void exitMartin() {
+//        ui.printer("Martin:\nBye Sir, see you tomorrow!");
+//        isBye = true;
+//        return;
+//    }
 
-    /**
-     * Display end message and quits
-     */
-    private static void exitMartin() {
-        printer("Martin:\nBye Sir, see you tomorrow!");
-        isBye = true;
-        return;
-    }
-
-    /**
-     * Displays list of tasks from savedList.txt
-     */
-    private static void displayListOfTasks() {
-        printHorizontalLine();
-        System.out.println("Martin's To-do List:");
-        for (int i = 0; i < tasks.size(); i++) {
-            String marked = tasks.get(i).getTaskDone() ? "X" : " ";
-            System.out.printf("%d. [%s] %s\n", i + 1, marked, tasks.get(i).getTaskDescription());
-        }
-        printHorizontalLine();
-    }
+//    /**
+//     * Displays list of tasks from savedList.txt
+//     */
+//    private static void displayListOfTasks() {
+//        ui.printHorizontalLine();
+//        System.out.println("Martin's To-do List:");
+//        for (int i = 0; i < tasks.size(); i++) {
+//            String marked = tasks.get(i).getTaskDone() ? "X" : " ";
+//            System.out.printf("%d. [%s] %s\n", i + 1, marked, tasks.get(i).getTaskDescription());
+//        }
+//        ui.printHorizontalLine();
+//    }
 
     /**
      * Mark task as done. Task index is second argument in user input
      */
     private static void markTask(String[] userCommandArray) {
         int itemIndex = getItemIndex(userCommandArray);
-        tasks.get(itemIndex - 1).markAsDone();
-        printer(String.format("Martin:\nGood news Sir! I have marked %d. %s as done.", itemIndex, tasks.get(itemIndex - 1).getTaskDescription()));
+        Task task = tasks.get(itemIndex - 1);
+        task.markAsDone();
+        ui.showMarkedTask(task, itemIndex);
+        //ui.printer(String.format("Martin:\nGood news Sir! I have marked %d. %s as done.", itemIndex, tasks.get(itemIndex - 1).getTaskDescription()));
     }
 
     /**
@@ -186,8 +197,10 @@ public class Martin {
      */
     private static void unmarkTask(String[] userCommandArray) {
         int itemIndex = getItemIndex(userCommandArray);
-        tasks.get(itemIndex - 1).unmarkAsDone();
-        printer(String.format("Martin:\nSorry Sir, I have to remark %d. %s as undone.", itemIndex, tasks.get(itemIndex - 1).getTaskDescription()));
+        Task task = tasks.get(itemIndex - 1);
+        task.markAsDone();
+        ui.showUnmarkedTask(task,itemIndex);
+//        ui.printer(String.format("Martin:\nSorry Sir, I have to remark %d. %s as undone.", itemIndex, tasks.get(itemIndex - 1).getTaskDescription()));
     }
 
     private static int getItemIndex(String[] userCommandArray) {
@@ -195,10 +208,10 @@ public class Martin {
         try {
             itemIndex = Integer.parseInt(userCommandArray[1]);
         } catch (NumberFormatException e) {
-            throwError("please key in an integer for the task index!");
+            throw new IllegalArgumentException("please key in an integer for the task index!");
         }
         if (itemIndex > tasks.size()) {
-            throwError("you have keyed in an index that does not exist.");
+            throw new IllegalArgumentException("you have keyed in an index that does not exist.");
         }
         return itemIndex;
     }
@@ -208,11 +221,12 @@ public class Martin {
      */
     private static void addTodoTask(String stringAfterCommand) {
         if (stringAfterCommand.isBlank()) {
-            throwError("please follow the Todo task format: todo <description>.");
+            throw new IllegalArgumentException("please follow the Todo task format: todo <description>.");
         }
         Todo task = new Todo(stringAfterCommand);
         storeActivity(task);
-        printer("Martin:\nYes Sir, I have added this task to my list:\n" + "    [" + task.getTypeOfTask() + "]" + "[ ] " + task.getTaskDescription() + "\nI currently have " + tasks.size() + " tasks in the list.");
+        ui.showTaskAddSuccess(task, tasks.size());
+//        ui.printer("Martin:\nYes Sir, I have added this task to my list:\n" + "    [" + task.getTypeOfTask() + "]" + "[ ] " + task.getTaskDescription() + "\nI currently have " + tasks.size() + " tasks in the list.");
     }
 
     /**
@@ -220,7 +234,7 @@ public class Martin {
      */
     private static void addEventTask(String stringAfterCommand) {
         if (!(stringAfterCommand.contains("/from") && (stringAfterCommand.contains("/to")))) {
-            throwError("please follow the Event task format: event <description> /from <startDate> /to <endDate>.");
+            throw new IllegalArgumentException("please follow the Event task format: event <description> /from <startDate> /to <endDate>.");
         }
         String description = null;
         String startDate = null;
@@ -230,11 +244,12 @@ public class Martin {
             startDate = stringAfterCommand.substring(stringAfterCommand.indexOf("/from") + 6, stringAfterCommand.indexOf("/to") - 1);
             endDate = stringAfterCommand.substring(stringAfterCommand.indexOf("/to") + 4);
         } catch (IndexOutOfBoundsException e) {
-            throwError("please follow the Event task format: event <description> /from <startDate> /to <endDate>.");
+            throw new IllegalArgumentException("please follow the Event task format: event <description> /from <startDate> /to <endDate>.");
         }
         Event task = new Event(description, startDate, endDate);
         storeActivity(task);
-        printer("Martin:\nYes Sir, I have added this task to my list:\n" + "    [" + task.getTypeOfTask() + "]" + "[ ] " + task.getTaskDescription() + "\nI currently have " + tasks.size() + " tasks in the list.");
+        ui.showTaskAddSuccess(task, tasks.size());
+//        ui.printer("Martin:\nYes Sir, I have added this task to my list:\n" + "    [" + task.getTypeOfTask() + "]" + "[ ] " + task.getTaskDescription() + "\nI currently have " + tasks.size() + " tasks in the list.");
     }
 
     /**
@@ -242,22 +257,23 @@ public class Martin {
      */
     private static void addDeadlineTask(String stringAfterCommand) {
         if (!stringAfterCommand.contains("/by")) {
-            throwError("please follow the Deadline task format: deadline <description> /by <deadline>.");
+            throw new IllegalArgumentException("please follow the Deadline task format: deadline <description> /by <deadline>.");
         }
-        String description = null;
-        String deadline = null;
+        String description;
+        String deadline;
         try {
             description = stringAfterCommand.substring(0, stringAfterCommand.indexOf("/by") - 1);
             deadline = stringAfterCommand.substring(stringAfterCommand.indexOf("/by") + 4);
         } catch (IndexOutOfBoundsException e) {
-            throwError("please follow the Deadline task format: deadline <description> /by <deadline>.");
+            throw new IllegalArgumentException("please follow the Deadline task format: deadline <description> /by <deadline>.");
         }
         Deadline task = new Deadline(description, deadline);
         storeActivity(task);
-        printer("Martin:\nYes Sir, I have added this task to my list:\n" + "    [" + task.getTypeOfTask() + "]" + "[ ] " + task.getTaskDescription() + "\nI currently have " + tasks.size() + " tasks in the list.");
+        ui.showTaskAddSuccess(task, tasks.size());
+//        ui.printer("Martin:\nYes Sir, I have added this task to my list:\n" + "    [" + task.getTypeOfTask() + "]" + "[ ] " + task.getTaskDescription() + "\nI currently have " + tasks.size() + " tasks in the list.");
     }
 
-    private static void throwError(String message) {
-        throw new IllegalArgumentException(message);
-    }
+//    private static void throwError(String message) {
+//        throw new IllegalArgumentException(message);
+//    }
 }
