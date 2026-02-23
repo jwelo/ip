@@ -14,15 +14,14 @@ import martin.task.Task;
 import martin.task.Todo;
 
 public class Martin {
-//    public static final int HORIZONTAL_LINE = 40;
     private static Ui ui = new Ui();
     private static Storage storage = new Storage("savedList.txt");
-    private static List<Task> tasks = new ArrayList<>();
+    private static TaskList tasks;
     private static boolean isBye = false;
 
     public static void main(String[] args) {
         try {
-            tasks = storage.loadSavedTasks();
+            tasks = new TaskList(storage.loadSavedTasks());
             ui.showFileSaveFound();
         } catch (IOException e) {
             ui.showFileLoadingError();
@@ -31,7 +30,6 @@ public class Martin {
 
         while (!isBye) {
             // Ask for next command
-            System.out.println("User Command:");
             String line = ui.getNextLine();
             String[] userCommandArray = line.split(" ", 2);
             String stringAfterCommand = userCommandArray.length > 1 ? userCommandArray[1] : "";
@@ -44,7 +42,7 @@ public class Martin {
                     isBye = true;
                     break;
                 case "list":
-                    ui.displayListOfTasks(tasks);
+                    ui.displayListOfTasks(tasks.getAllTasks());
                     break;
                 case "mark":
                     markTask(userCommandArray);
@@ -77,14 +75,14 @@ public class Martin {
 
     private static void deleteTask(String[] userCommandArray) throws IOException {
         int itemIndex = getItemIndex(userCommandArray);
-        ui.showTaskDeleteSuccess(tasks, itemIndex);
-        tasks.remove(itemIndex - 1);
-        storage.saveAllTasks(tasks);
+        Task deletedTask = tasks.deleteTask(itemIndex - 1);
+        ui.showTaskDeleteSuccess(deletedTask, itemIndex);
+        storage.saveAllTasks(tasks.getAllTasks());
     }
 
     private static void storeTask(Task task) {
         try {
-            tasks.add(task);
+            tasks.addTask(task);
             storage.appendTask(task);
         } catch (IOException e) {
             ui.showFileSaveError(e);
@@ -96,7 +94,7 @@ public class Martin {
      */
     private static void markTask(String[] userCommandArray) {
         int itemIndex = getItemIndex(userCommandArray);
-        Task task = tasks.get(itemIndex - 1);
+        Task task = tasks.getTask(itemIndex);
         task.markAsDone();
         ui.showMarkedTask(task, itemIndex);
     }
@@ -106,7 +104,7 @@ public class Martin {
      */
     private static void unmarkTask(String[] userCommandArray) {
         int itemIndex = getItemIndex(userCommandArray);
-        Task task = tasks.get(itemIndex - 1);
+        Task task = tasks.getTask(itemIndex);
         task.unmarkAsDone();
         ui.showUnmarkedTask(task,itemIndex);
     }
@@ -118,7 +116,7 @@ public class Martin {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("please key in an integer for the task index!");
         }
-        if (itemIndex > tasks.size()) {
+        if (itemIndex > tasks.getTasksSize()) {
             throw new IllegalArgumentException("you have keyed in an index that does not exist.");
         }
         return itemIndex;
@@ -133,7 +131,7 @@ public class Martin {
         }
         Todo task = new Todo(stringAfterCommand);
         storeTask(task);
-        ui.showTaskAddSuccess(task, tasks.size());
+        ui.showTaskAddSuccess(task, tasks.getTasksSize());
     }
 
     /**
@@ -155,7 +153,7 @@ public class Martin {
         }
         Event task = new Event(description, startDate, endDate);
         storeTask(task);
-        ui.showTaskAddSuccess(task, tasks.size());
+        ui.showTaskAddSuccess(task, tasks.getTasksSize());
     }
 
     /**
@@ -175,6 +173,6 @@ public class Martin {
         }
         Deadline task = new Deadline(description, deadline);
         storeTask(task);
-        ui.showTaskAddSuccess(task, tasks.size());
+        ui.showTaskAddSuccess(task, tasks.getTasksSize());
     }
 }
