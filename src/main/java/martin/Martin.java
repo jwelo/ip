@@ -16,15 +16,15 @@ import martin.task.Todo;
 public class Martin {
 //    public static final int HORIZONTAL_LINE = 40;
     private static Ui ui = new Ui();
+    private static Storage storage = new Storage("savedList.txt");
     private static List<Task> tasks = new ArrayList<>();
     private static boolean isBye = false;
 
     public static void main(String[] args) {
-//        Scanner in = getFirstScanner();
         try {
-            getSavedTasks();
+            tasks = storage.loadSavedTasks();
+            ui.showFileSaveFound();
         } catch (IOException e) {
-//            System.err.println("Could not load saved tasks. Reason: " + e.getMessage());
             ui.showFileLoadingError();
         }
 
@@ -68,118 +68,28 @@ public class Martin {
                     throw new IllegalArgumentException("you have keyed in an unrecognised command.");
                 }
             } catch (IllegalArgumentException e) {
-//                ui.printer("Martin:\nSir, " + e.getMessage() + " Please try again.");
                 ui.showError(e.getMessage());
+            } catch (IOException e) {
+                ui.showFileSaveError(e);
             }
         }
     }
 
-    private static void deleteTask(String[] userCommandArray) {
+    private static void deleteTask(String[] userCommandArray) throws IOException {
         int itemIndex = getItemIndex(userCommandArray);
-//        ui.printer(String.format("Martin:\nUnderstood Sir, I have deleted this task - %d. %s.", itemIndex, tasks.get(itemIndex - 1).getTaskDescription()));
         ui.showTaskDeleteSuccess(tasks, itemIndex);
         tasks.remove(itemIndex - 1);
+        storage.saveAllTasks(tasks);
+    }
 
-        Path path = Path.of("savedList.txt");
+    private static void storeTask(Task task) {
         try {
-            saveAllTasks(path);
-        } catch (IOException e) {
-            ui.showFileSaveError(e);
-        }
-    }
-
-    private static void saveAllTasks(Path path) throws IOException {
-        List<String> lines = new ArrayList<>();
-        for (Task t : tasks) {
-            String line = t.getTypeOfTask() + ";" + t.getTaskDone() + ";" + t.getTaskDescription();
-            lines.add(line);
-        }
-        Files.write(path, lines,
-                StandardOpenOption.CREATE,
-                StandardOpenOption.WRITE,
-                StandardOpenOption.TRUNCATE_EXISTING);
-    }
-
-    private static void getSavedTasks() throws IOException {
-        Path savedList = Path.of("savedList.txt");
-        if (Files.notExists(savedList)) {
-//            System.out.println("No save file found.");
-            ui.showFileLoadingError();
-            Files.createFile(savedList);
-//            System.out.println("File created successfully!");
-            ui.showFileCreateSuccess();
-        } else {
-//            System.out.println("Save file detected. Loading data...");
-            ui.showFileSaveFound();
-        }
-        List<String> savedTasks = Files.readAllLines(savedList);
-        for (String line : savedTasks) {
-            String[] parts = line.split(";");
-            //String typeOfTask = parts[0]; // currently not needed as list does not include type of task
-            String done = parts[1];
-            String description = parts[2];
-            Task task = new Task(description);
-            if (done.equals("1")) {
-                task.markAsDone();
-            }
             tasks.add(task);
-        }
-    }
-
-    private static void storeActivity(Task activity) {
-        Path path = Path.of("savedList.txt");
-        String formattedTaskAsString = activity.getTypeOfTask() + ";" + activity.getTaskDone() + ";" + activity.getTaskDescription();
-        formattedTaskAsString += "\n";
-        try {
-            Files.writeString(path, formattedTaskAsString,
-                    StandardOpenOption.CREATE,
-                    StandardOpenOption.APPEND);
+            storage.appendTask(task);
         } catch (IOException e) {
-//            System.err.println("Could not save to file: " + e.getMessage());
             ui.showFileSaveError(e);
         }
-        tasks.add(activity);
     }
-
-//    private static void printHorizontalLine() {
-//        System.out.println("_".repeat(HORIZONTAL_LINE));
-//    }
-
-//    private static void printer(String line) {
-//        printHorizontalLine();
-//        System.out.println(line);
-//        printHorizontalLine();
-//    }
-
-//    private static Scanner getFirstScanner() {
-//        printer("Martin:\nHello sir my name is Martin.\nWhat can I do for you today?");
-//
-//        Scanner in = new Scanner(System.in);
-//        String line = "";
-//        return in;
-//    }
-
-//    /**
-//     * Display end message and quits
-//     */
-//    private static void exitMartin() {
-//        ui.printer("Martin:\nBye Sir, see you tomorrow!");
-//        isBye = true;
-//        return;
-//    }
-
-//    /**
-//     * Displays list of tasks from savedList.txt
-//     */
-//    private static void displayListOfTasks() {
-//        ui.printHorizontalLine();
-//        System.out.println("Martin's To-do List:");
-//        for (int i = 0; i < tasks.size(); i++) {
-//            String marked = tasks.get(i).getTaskDone() ? "X" : " ";
-//            System.out.printf("%d. [%s] %s\n", i + 1, marked, tasks.get(i).getTaskDescription());
-//        }
-//        ui.printHorizontalLine();
-//    }
 
     /**
      * Mark task as done. Task index is second argument in user input
@@ -189,7 +99,6 @@ public class Martin {
         Task task = tasks.get(itemIndex - 1);
         task.markAsDone();
         ui.showMarkedTask(task, itemIndex);
-        //ui.printer(String.format("Martin:\nGood news Sir! I have marked %d. %s as done.", itemIndex, tasks.get(itemIndex - 1).getTaskDescription()));
     }
 
     /**
@@ -198,9 +107,8 @@ public class Martin {
     private static void unmarkTask(String[] userCommandArray) {
         int itemIndex = getItemIndex(userCommandArray);
         Task task = tasks.get(itemIndex - 1);
-        task.markAsDone();
+        task.unmarkAsDone();
         ui.showUnmarkedTask(task,itemIndex);
-//        ui.printer(String.format("Martin:\nSorry Sir, I have to remark %d. %s as undone.", itemIndex, tasks.get(itemIndex - 1).getTaskDescription()));
     }
 
     private static int getItemIndex(String[] userCommandArray) {
@@ -224,9 +132,8 @@ public class Martin {
             throw new IllegalArgumentException("please follow the Todo task format: todo <description>.");
         }
         Todo task = new Todo(stringAfterCommand);
-        storeActivity(task);
+        storeTask(task);
         ui.showTaskAddSuccess(task, tasks.size());
-//        ui.printer("Martin:\nYes Sir, I have added this task to my list:\n" + "    [" + task.getTypeOfTask() + "]" + "[ ] " + task.getTaskDescription() + "\nI currently have " + tasks.size() + " tasks in the list.");
     }
 
     /**
@@ -247,9 +154,8 @@ public class Martin {
             throw new IllegalArgumentException("please follow the Event task format: event <description> /from <startDate> /to <endDate>.");
         }
         Event task = new Event(description, startDate, endDate);
-        storeActivity(task);
+        storeTask(task);
         ui.showTaskAddSuccess(task, tasks.size());
-//        ui.printer("Martin:\nYes Sir, I have added this task to my list:\n" + "    [" + task.getTypeOfTask() + "]" + "[ ] " + task.getTaskDescription() + "\nI currently have " + tasks.size() + " tasks in the list.");
     }
 
     /**
@@ -268,12 +174,7 @@ public class Martin {
             throw new IllegalArgumentException("please follow the Deadline task format: deadline <description> /by <deadline>.");
         }
         Deadline task = new Deadline(description, deadline);
-        storeActivity(task);
+        storeTask(task);
         ui.showTaskAddSuccess(task, tasks.size());
-//        ui.printer("Martin:\nYes Sir, I have added this task to my list:\n" + "    [" + task.getTypeOfTask() + "]" + "[ ] " + task.getTaskDescription() + "\nI currently have " + tasks.size() + " tasks in the list.");
     }
-
-//    private static void throwError(String message) {
-//        throw new IllegalArgumentException(message);
-//    }
 }
