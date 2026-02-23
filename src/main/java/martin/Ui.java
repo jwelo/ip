@@ -25,7 +25,7 @@ public class Ui {
     }
 
     public void showFileLoadingError() {
-        System.out.println("No save file found. Creating 'savedList.txt'...");
+        System.out.println("No previous save file found.");
     }
 
     public void showFileCreateSuccess() {
