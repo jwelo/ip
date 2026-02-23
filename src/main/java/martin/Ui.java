@@ -29,10 +29,6 @@ public class Ui {
         System.out.println("No previous save file found.");
     }
 
-    public void showFileCreateSuccess() {
-        System.out.println("File created successfully!");
-    }
-
     public void showFileSaveFound() {
         System.out.println("Save file detected. Loading data...");
     }
