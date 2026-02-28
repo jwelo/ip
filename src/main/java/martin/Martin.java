@@ -1,7 +1,7 @@
 package martin;
 
 import java.io.IOException;
-//import java.util.Scanner;
+import java.util.List;
 
 import martin.task.Deadline;
 import martin.task.Event;
@@ -57,6 +57,9 @@ public class Martin {
                 case "event":
                     addEventTask(stringAfterCommand);
                     break;
+                case "find":
+                    findTaskWithKeyword(stringAfterCommand);
+                    break;
                 default:
                     throw new IllegalArgumentException("you have keyed in an unrecognised command.");
                 }
@@ -66,6 +69,11 @@ public class Martin {
                 ui.showFileSaveError(e);
             }
         }
+    }
+
+    private static void findTaskWithKeyword(String stringAfterCommand) {
+        List<String> tasksContainingKeyword = tasks.findTasksContainingKeyword(stringAfterCommand);
+        ui.showTasksContainingKeyword(tasksContainingKeyword);
     }
 
     private static void deleteTask(String userArgument) throws IOException {

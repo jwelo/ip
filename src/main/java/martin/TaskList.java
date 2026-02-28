@@ -34,4 +34,19 @@ public class TaskList {
     public List<Task> getAllTasks() {
         return tasks;
     }
+
+    public List<String> findTasksContainingKeyword(String keyword) {
+        List<String> tasksContainingKeyword = new ArrayList<>();
+        for (int i = 0; i < getTasksSize(); i++) {
+            String description = tasks.get(i).getTaskDescription();
+            if (description.contains(keyword)) {
+                String isDone = " ";
+                if (tasks.get(i).getTaskDone()) {
+                    isDone = "X";
+                }
+                tasksContainingKeyword.add("[" + tasks.get(i).getTypeOfTask() + "]" + "[" + isDone + "] " + description);
+            }
+        }
+        return tasksContainingKeyword;
+    }
 }

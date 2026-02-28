@@ -40,4 +40,20 @@ public class Task {
         this.isDone = false;
         this.description = description;
     }
+
+    public Task(String typeOfTask, String description) {
+        this.typeOfTask = typeOfTask;
+        this.isDone = false;
+        this.description = description;
+    }
+
+    public Task(String typeOfTask, String isDone, String description) {
+        this.typeOfTask = typeOfTask;
+        if (isDone.equals("true")) {
+            this.isDone = true;
+        } else {
+            this.isDone = false;
+        }
+        this.description = description;
+    }
 }
